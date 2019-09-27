@@ -14,32 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios'
-import Vue from 'vue'
-import HttpStatus from 'http-status'
+package org.apache.dubbo.admin.model.domain;
 
-let instance = axios.create({
-  baseURL: '/api/dev'
-})
+public class UserToken extends BaseAuthority {
+    private String userName;
+    private String token;
+    private Long lastUpdateTimestamp;
+    @java.lang.Override
+    public String getKey() {
+        return token;
+    }
 
-instance.interceptors.request.use(config => {
-  let token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = token
-  }
-  return config
-})
+    public String getUserName() {
+        return userName;
+    }
 
-instance.interceptors.response.use((response) => {
-  return response
-}, (error) => {
-  if (error.message.indexOf('Network Error') >= 0) {
-    Vue.prototype.$notify.error('Network error, please check your network settings!')
-  } else if (error.response.status === HttpStatus.UNAUTHORIZED) {
-    // TODO jump to url
-  } else if (error.response.status >= HttpStatus.BAD_REQUEST) {
-    Vue.prototype.$notify.error(error.response.data.message)
-  }
-})
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-export const AXIOS = instance
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public Long getLastUpdateTimestamp() {
+        return lastUpdateTimestamp;
+    }
+
+    public void setLastUpdateTimestamp(Long lastUpdateTimestamp) {
+        this.lastUpdateTimestamp = lastUpdateTimestamp;
+    }
+}

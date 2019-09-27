@@ -18,8 +18,12 @@
 package org.apache.dubbo.admin.config;
 
 import org.apache.commons.lang3.StringUtils;
+
+import org.apache.dubbo.admin.authority.store.AuthorityStore;
+import org.apache.dubbo.admin.authority.store.impl.NoOpAuthorityStore;
 import org.apache.dubbo.admin.common.exception.ConfigurationException;
 import org.apache.dubbo.admin.common.util.Constants;
+import org.apache.dubbo.admin.common.util.UrlUtils;
 import org.apache.dubbo.admin.registry.config.GovernanceConfiguration;
 import org.apache.dubbo.admin.registry.metadata.MetaDataCollector;
 import org.apache.dubbo.admin.registry.metadata.impl.NoOpMetadataCollector;
@@ -52,6 +56,8 @@ public class ConfigCenter {
 
     @Value("${admin.metadata-report.address:}")
     private String metadataAddress;
+    @Value("${admin.authority-store.url:}")
+    private String authorityStore;
 
     @Value("${admin.metadata-report.cluster:false}")
     private boolean cluster;
@@ -116,6 +122,19 @@ public class ConfigCenter {
             }
         }
         return dynamicConfiguration;
+    }
+
+    @Bean(value = "authorityStore")
+    AuthorityStore getAuthorityStore() {
+        if (StringUtils.isBlank(authorityStore)) {
+            return new NoOpAuthorityStore();
+        }
+
+        URL url = URL.valueOf(authorityStore);
+        AuthorityStore authorityStore = ExtensionLoader.getExtensionLoader(AuthorityStore.class).getExtension(url.getProtocol());
+        authorityStore.setUrl(url);
+        authorityStore.init();
+        return authorityStore;
     }
 
     /*

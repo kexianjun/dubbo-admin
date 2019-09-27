@@ -74,7 +74,8 @@
     data: () => ({
       mini: false,
       drawer: true,
-      menus: menu
+      menus: menu,
+      authorityList: []
     }),
     created () {
       window.getApp.$on('DRAWER_TOGGLED', () => {

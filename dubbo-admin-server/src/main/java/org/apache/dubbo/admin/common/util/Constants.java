@@ -73,6 +73,7 @@ public class Constants {
     public static final String GLOBAL_CONFIG_PATH = "config/dubbo/dubbo.properties";
     public static final String METRICS_PORT = "metrics.port";
     public static final String METRICS_PROTOCOL = "metrics.protocol";
+    public static final String PATH_KEY = "path";
     public static final Set<String> CONFIGS = new HashSet<>();
 
     static {

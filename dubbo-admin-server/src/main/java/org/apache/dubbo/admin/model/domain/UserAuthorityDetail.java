@@ -14,32 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios'
-import Vue from 'vue'
-import HttpStatus from 'http-status'
+package org.apache.dubbo.admin.model.domain;
 
-let instance = axios.create({
-  baseURL: '/api/dev'
-})
+import java.util.Set;
 
-instance.interceptors.request.use(config => {
-  let token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = token
-  }
-  return config
-})
+public class UserAuthorityDetail {
+    private String userName;
+    private Set<String> authoritys;
+    private String token;
 
-instance.interceptors.response.use((response) => {
-  return response
-}, (error) => {
-  if (error.message.indexOf('Network Error') >= 0) {
-    Vue.prototype.$notify.error('Network error, please check your network settings!')
-  } else if (error.response.status === HttpStatus.UNAUTHORIZED) {
-    // TODO jump to url
-  } else if (error.response.status >= HttpStatus.BAD_REQUEST) {
-    Vue.prototype.$notify.error(error.response.data.message)
-  }
-})
+    public String getToken() {
+        return token;
+    }
 
-export const AXIOS = instance
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public Set<String> getAuthoritys() {
+        return authoritys;
+    }
+
+    public void setAuthoritys(Set<String> authoritys) {
+        this.authoritys = authoritys;
+    }
+}

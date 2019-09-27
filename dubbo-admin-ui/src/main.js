@@ -22,9 +22,9 @@ import App from './App'
 import router from './router'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
-import { store } from './store'
+import {store} from './store'
 import Notify from './components/public/notify'
-import { AXIOS } from './components/http-common'
+import {AXIOS} from './components/http-common'
 import i18n from './lang'
 import ECharts from 'vue-echarts/components/ECharts'
 import 'echarts/lib/chart/line'
@@ -53,6 +53,22 @@ new Vue({
   router,
   store,
   i18n,
-  components: { App },
+  components: {App},
   template: '<App/>'
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requireAuth)) {
+    console.log('需要登录')
+    if (localStorage.token) {
+      next()
+    } else {
+      next({
+        path: '/login',
+        query: {redirect: to.fullPath}
+      })
+    }
+  } else {
+    next()
+  }
 })

@@ -33,7 +33,17 @@ const Menu = [
   { title: 'serviceTest', path: '/test', icon: 'code' },
   { title: 'serviceMock', path: '/mock', icon: 'build', badge: 'feature' },
   { title: 'metrics', path: '/metrics', icon: 'show_chart', badge: 'feature' },
-  { title: 'configManage', path: '/management', icon: 'build' }
+  { title: 'configManage', path: '/management', icon: 'build' },
+  {
+    title: 'authController',
+    icon: 'build',
+    group: 'authority',
+    items: [
+      { title: 'userController', path: '/authority/user', icon: 'build' },
+      { title: 'authGroup', path: '/authority/authgroup', icon: 'build' },
+      { title: 'authConfig', path: '/authority/authority', icon: 'build' }
+    ]
+  }
 ]
 
 export default Menu

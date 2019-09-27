@@ -14,32 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios'
-import Vue from 'vue'
-import HttpStatus from 'http-status'
+package org.apache.dubbo.admin.config;
 
-let instance = axios.create({
-  baseURL: '/api/dev'
-})
+import org.apache.dubbo.admin.interceptor.AuthorizationInterceptor;
 
-instance.interceptors.request.use(config => {
-  let token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = token
-  }
-  return config
-})
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-instance.interceptors.response.use((response) => {
-  return response
-}, (error) => {
-  if (error.message.indexOf('Network Error') >= 0) {
-    Vue.prototype.$notify.error('Network error, please check your network settings!')
-  } else if (error.response.status === HttpStatus.UNAUTHORIZED) {
-    // TODO jump to url
-  } else if (error.response.status >= HttpStatus.BAD_REQUEST) {
-    Vue.prototype.$notify.error(error.response.data.message)
-  }
-})
-
-export const AXIOS = instance
+@Configuration
+public class WebMvcConfiguration implements WebMvcConfigurer {
+    @Autowired
+    private AuthorizationInterceptor interceptor;
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(interceptor).addPathPatterns("/**");
+    }
+}
