@@ -3,6 +3,8 @@ package org.apache.dubbo.admin.authority.store;
 import org.apache.dubbo.admin.authority.store.impl.LocalFileAuthorityStore;
 import org.apache.dubbo.admin.model.domain.User;
 import org.apache.dubbo.admin.model.domain.UserAuthorityDetail;
+import org.apache.dubbo.admin.model.dto.AuthorityGroupDTO;
+import org.apache.dubbo.admin.model.dto.UserAuthorityDTO;
 import org.apache.dubbo.admin.model.dto.UserDTO;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.extension.SPI;
@@ -27,4 +29,10 @@ public interface AuthorityStore {
     UserAuthorityDetail login(String userName, String password);
 
     boolean validateToken(String token);
+
+    boolean saveAuthorityGroup(AuthorityGroupDTO authorityGroupDTO);
+
+    User getUserByToken(String authorization);
+
+    void authorityToUser(UserAuthorityDTO userAuthorityDTO);
 }

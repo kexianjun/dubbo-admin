@@ -19,6 +19,8 @@ package org.apache.dubbo.admin.authority.store.impl;
 import org.apache.dubbo.admin.authority.store.AuthorityStore;
 import org.apache.dubbo.admin.model.domain.User;
 import org.apache.dubbo.admin.model.domain.UserAuthorityDetail;
+import org.apache.dubbo.admin.model.dto.AuthorityGroupDTO;
+import org.apache.dubbo.admin.model.dto.UserAuthorityDTO;
 import org.apache.dubbo.admin.model.dto.UserDTO;
 import org.apache.dubbo.common.URL;
 
@@ -65,5 +67,20 @@ public class NoOpAuthorityStore implements AuthorityStore {
     @Override
     public boolean validateToken(String token) {
         return false;
+    }
+
+    @Override
+    public boolean saveAuthorityGroup(AuthorityGroupDTO authorityGroupDTO) {
+        return false;
+    }
+
+    @Override
+    public User getUserByToken(String authorization) {
+        return null;
+    }
+
+    @Override
+    public void authorityToUser(UserAuthorityDTO userAuthorityDTO) {
+
     }
 }

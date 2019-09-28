@@ -3,6 +3,7 @@ package org.apache.dubbo.admin.controller.authority;
 import org.apache.dubbo.admin.authority.store.AuthorityStore;
 import org.apache.dubbo.admin.model.domain.User;
 import org.apache.dubbo.admin.model.domain.UserAuthorityDetail;
+import org.apache.dubbo.admin.model.dto.UserAuthorityDTO;
 import org.apache.dubbo.admin.model.dto.UserDTO;
 
 import com.alibaba.fastjson.JSON;
@@ -48,5 +49,11 @@ public class UserController {
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public UserAuthorityDetail login(@RequestParam String userName, @RequestParam String password) {
         return authorityStore.login(userName, password);
+    }
+
+    @RequestMapping(value = "/authority", method = RequestMethod.POST)
+    public boolean authority(@RequestBody UserAuthorityDTO userAuthorityDTO) {
+        authorityStore.authorityToUser(userAuthorityDTO);
+        return true;
     }
 }

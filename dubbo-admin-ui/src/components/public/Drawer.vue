@@ -33,7 +33,7 @@
 
     <v-list expand>
       <template v-for="(item, i) in menus">
-        <v-list-group v-if="item.items" :group="item.group" :prepend-icon="item.icon" no-action>
+        <v-list-group v-if="item.items" :group="item.group" :prepend-icon="item.icon" no-action v-show="isShow(item.title)">
           <v-list-tile slot="activator" ripple>
             <v-list-tile-content>
               <v-list-tile-title>{{ $t(item.title) }}</v-list-tile-title>
@@ -41,7 +41,7 @@
           </v-list-tile>
 
           <template v-for="(subItem, i) in item.items">
-            <v-list-tile :to="subItem.path" ripple>
+            <v-list-tile :to="subItem.path" ripple v-show="isShow(subItem.title)">
               <v-list-tile-content>
                 <v-list-tile-title>{{ $t(subItem.title) }}</v-list-tile-title>
               </v-list-tile-content>
@@ -52,7 +52,7 @@
           </template>
         </v-list-group>
 
-        <v-list-tile v-else :key="item.title" :to="item.path" ripple>
+        <v-list-tile v-else :key="item.title" :to="item.path" ripple v-show="isShow(item.title)">
           <v-list-tile-action>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-tile-action>
@@ -85,6 +85,18 @@
     computed: {
       sideToolbarColor () {
         return this.$vuetify.options.extra.sideNav
+      }
+    },
+    methods: {
+      isShow (title) {
+        let authorityList = localStorage.getItem('authorityList')
+        let list = JSON.parse(authorityList)
+        for (let authority of list) {
+          if (title === authority) {
+            return true
+          }
+        }
+        return false
       }
     }
   }

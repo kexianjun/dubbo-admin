@@ -8,6 +8,8 @@ import org.apache.dubbo.admin.model.domain.BaseAuthority;
 import org.apache.dubbo.admin.model.domain.User;
 import org.apache.dubbo.admin.model.domain.UserAuthorityDetail;
 import org.apache.dubbo.admin.model.domain.UserToken;
+import org.apache.dubbo.admin.model.dto.AuthorityGroupDTO;
+import org.apache.dubbo.admin.model.dto.UserAuthorityDTO;
 import org.apache.dubbo.admin.model.dto.UserDTO;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.utils.CollectionUtils;
@@ -34,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class LocalFileAuthorityStore implements AuthorityStore {
@@ -113,6 +116,11 @@ public class LocalFileAuthorityStore implements AuthorityStore {
         adminAuthorityList.add("loadBalance");
         adminAuthorityList.add("serviceTest");
         adminAuthorityList.add("serviceMock");
+        adminAuthorityList.add("metrics");
+        adminAuthorityList.add("configManage");
+        adminAuthorityList.add("authController");
+        adminAuthorityList.add("userController");
+        adminAuthorityList.add("authConfig");
         authorityGroupMap.put("admin", adminAuthorityList);
 
     }
@@ -184,35 +192,40 @@ public class LocalFileAuthorityStore implements AuthorityStore {
     }
 
     private void loadDefaultAuthorityAndAuthorityGroup() {
-        Map<String, Authority> authorityMap = new HashMap<>();
-        for (Map.Entry<String, List<String>> menuEntry : menuAuthorityMap.entrySet()) {
-            Authority menuAuthority = new Authority();
-            menuAuthority.setParent(null);
-            menuAuthority.setAuthorityKey(menuEntry.getKey());
-            menuAuthority.setAuthorityType(Authority.MENU);
-            authorityMap.put(menuEntry.getKey(), menuAuthority);
-            if (CollectionUtils.isNotEmpty(menuEntry.getValue())) {
-                for (String interfaceAuthority :menuEntry.getValue()){
-                    Authority authority = new Authority();
-                    authority.setAuthorityKey(interfaceAuthority);
-                    authority.setParent(menuEntry.getKey());
-                    authority.setAuthorityType(Authority.INTERFACE);
-                    authorityMap.put(interfaceAuthority, authority);
+        Map<String, Authority> authorityStoreMap = authorityStore.getStore();
+        if (authorityStoreMap.size() == 0) {
+            Map<String, Authority> authorityMap = new HashMap<>();
+            for (Map.Entry<String, List<String>> menuEntry : menuAuthorityMap.entrySet()) {
+                Authority menuAuthority = new Authority();
+                menuAuthority.setParent(null);
+                menuAuthority.setAuthorityKey(menuEntry.getKey());
+                menuAuthority.setAuthorityType(Authority.MENU);
+                authorityMap.put(menuEntry.getKey(), menuAuthority);
+                if (CollectionUtils.isNotEmpty(menuEntry.getValue())) {
+                    for (String interfaceAuthority :menuEntry.getValue()){
+                        Authority authority = new Authority();
+                        authority.setAuthorityKey(interfaceAuthority);
+                        authority.setParent(menuEntry.getKey());
+                        authority.setAuthorityType(Authority.INTERFACE);
+                        authorityMap.put(interfaceAuthority, authority);
+                    }
                 }
             }
+
+            authorityStore.saveStore(authorityMap);
         }
 
-        authorityStore.saveStore(authorityMap);
-
-        AuthorityGroup authorityGroup = new AuthorityGroup();
-        for (Map.Entry<String, List<String>> authorityGroupEntry : authorityGroupMap.entrySet()) {
-            authorityGroup.setAuthorityGroupKey(authorityGroupEntry.getKey());
-            Set<String> set = new HashSet<>();
-            set.addAll(authorityGroupEntry.getValue());
-            authorityGroup.setAuthorityKeyList(set);
+        if (authorityGroupStore.getStore().size() == 0) {
+            AuthorityGroup authorityGroup = new AuthorityGroup();
+            for (Map.Entry<String, List<String>> authorityGroupEntry : authorityGroupMap.entrySet()) {
+                authorityGroup.setAuthorityGroupKey(authorityGroupEntry.getKey());
+                Set<String> set = new HashSet<>();
+                set.addAll(authorityGroupEntry.getValue());
+                authorityGroup.setAuthorityKeyList(set);
+            }
+            authorityGroupStore.saveStore(authorityGroup);
         }
 
-        authorityGroupStore.saveStore(authorityGroup);
     }
 
     @Override
@@ -230,10 +243,11 @@ public class LocalFileAuthorityStore implements AuthorityStore {
 
     @Override
     public List<User> getUsers(String userNamePattern) {
+
         return userStore.getStore()
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getKey().contains(userNamePattern))
+                .filter(entry -> (Constants.ANY_VALUE.equals(userNamePattern)) || entry.getKey().contains(userNamePattern))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
     }
@@ -284,6 +298,33 @@ public class LocalFileAuthorityStore implements AuthorityStore {
         // Update last update timestamp
         userToken.setLastUpdateTimestamp(System.currentTimeMillis());
         return true;
+    }
+
+    @Override
+    public boolean saveAuthorityGroup(AuthorityGroupDTO authorityGroupDTO) {
+        AuthorityGroup authorityGroup = new AuthorityGroup();
+        authorityGroup.setAuthorityGroupKey(authorityGroupDTO.getAuthorityGroupName());
+        authorityGroup.setAuthorityKeyList(authorityGroupDTO.getAuthorityNameList());
+        authorityGroupStore.saveStore(authorityGroup);
+        return true;
+    }
+
+    @Override
+    public User getUserByToken(String authorization) {
+        UserToken store = tokenStore.getStore(authorization);
+        return userStore.getStore(store.getUserName());
+    }
+
+    @Override
+    public void authorityToUser(UserAuthorityDTO userAuthorityDTO) {
+        User store = userStore.getStore(userAuthorityDTO.getUserName());
+        Set<String> authorityGroup = store.getAuthorityGroup();
+        if (null == authorityGroup) {
+            authorityGroup = new HashSet<>();
+        }
+        authorityGroup.addAll(userAuthorityDTO.getAuthorityGroupList());
+        store.setAuthorityGroup(authorityGroup);
+        userStore.saveStore(store);
     }
 
     private static class UserStore extends AbstractStore<User> {

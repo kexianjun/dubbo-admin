@@ -11,7 +11,6 @@
           <v-treeview
             v-model="selection"
             :items="treeItems"
-            :selection-type="leaf"
             selectable
             return-object
             open-all
@@ -32,6 +31,26 @@
         </v-card>
       </v-flex>
     </v-layout>
+
+    <v-dialog v-model="dialog" width="400px" persistent>
+      <v-card>
+        <v-card-title class="justify-center">
+          <span class="headline">{{$t('createAuthorityGroup')}}</span>
+        </v-card-title>
+        <v-card-text>
+          <v-text-field
+            :label="$t('authorityGroupName')"
+            :hint="$t('authorityGroupNameHint')"
+            v-model="authorityGroupName"
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn flat @click.native="closeDialog">{{$t('close')}}</v-btn>
+          <v-btn depressed color="primary" @click.native="newAuthorityGroup">{{$t('save')}}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -42,8 +61,45 @@
     name: 'Authority',
     data: () => ({
       treeItems: [],
-      selection: []
+      selection: [],
+      authorityGroupName: '',
+      dialog: false
     }),
+    methods: {
+      openDialog: function () {
+        this.authorityGroupName = ''
+        this.dialog = true
+      },
+      closeDialog: function () {
+        this.authorityGroupName = ''
+        this.dialog = false
+      },
+      newAuthorityGroup: function () {
+        let authorityGroupDTO = {}
+        if (!this.authorityGroupName) {
+          this.$notify.error('Authority group name is needed')
+          return
+        }
+        if (this.selection.length === 0) {
+          this.$notify.error('Please select at least an authority')
+          return
+        }
+        authorityGroupDTO.authorityGroupName = this.authorityGroupName
+
+        authorityGroupDTO.authorityNameList = this.selection.map(function (item, index, arr) {
+          return item.key
+        })
+        this.$axios.post('/authority/authorityGroup/create', authorityGroupDTO)
+          .then(response => {
+            if (response.status === 200) {
+              this.closeDialog()
+              this.selection = []
+              this.$notify.success('Add success')
+              this.search('', true)
+            }
+          })
+      }
+    },
     created: function () {
       let itemList = []
       let id = 1
