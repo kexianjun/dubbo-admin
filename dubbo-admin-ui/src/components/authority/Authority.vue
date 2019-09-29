@@ -17,17 +17,35 @@
           ></v-treeview>
         </v-card>
       </v-flex>
-        <v-divider vertical></v-divider>
       <v-flex lg4 sm6 xs12>
         <v-card>
-          <template v-if="!selection.length">
-            No nodes selected.
-          </template>
-          <template v-else>
-            <div v-for="node in selection" :key="node.id">
-              {{ node.name }} : {{ node.key }}
-            </div>
-          </template>
+          <v-card-text class="pa-0">
+            <v-card-title class="justify-center">
+              <span class="headline">{{$t('authGroup')}}</span>
+            </v-card-title>
+            <template>
+              <v-data-table
+                class="elevation-0 table-striped"
+                :headers="headers"
+                :items="authorityGroupTable"
+                item-key="name"
+              >
+                <template slot="items" slot-scope="props">
+                  <td>{{props.item.name}}</td>
+                  <td class="text-xs-center px-0" nowrap>
+                    <v-btn outline small color="tiny" @click.stop="openAuthorityDialog(props.item.name)"
+                           class="mb-2">
+                      {{$t('edit')}}
+                    </v-btn>
+                    <v-btn outline small color="tiny" @click.stop="openAuthorityGroupDetail(props.item.name)"
+                           class="mb-2">
+                      {{$t('detail')}}
+                    </v-btn>
+                  </td>
+                </template>
+              </v-data-table>
+            </template>
+          </v-card-text>
         </v-card>
       </v-flex>
     </v-layout>
@@ -51,6 +69,27 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="authorityGroupDetailDialog" width="400px" persistent>
+      <v-card>
+        <v-card-title class="justify-center">
+          <span class="headline">{{$t('detail')}}</span>
+        </v-card-title>
+        <v-flex lg4 sm6 xs12>
+            <v-treeview
+              v-model="detailSelection"
+              :items="treeItems"
+              selectable
+              return-object
+              open-all
+            ></v-treeview>
+        </v-flex>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn flat @click.native="closeAuthorityGroupDetail">{{$t('close')}}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -60,12 +99,32 @@
   export default {
     name: 'Authority',
     data: () => ({
+      authorityGroupDetailDialog: false,
       treeItems: [],
       selection: [],
+      detailSelection: [],
       authorityGroupName: '',
-      dialog: false
+      dialog: false,
+      authorityGroupItems: [],
+      headers: []
     }),
+    computed: {
+      authorityGroupTable: function () {
+        return this.authorityGroupItems
+      }
+    },
     methods: {
+      setHeader: function () {
+        this.headers = [{
+          text: this.$t('authGroup'),
+          value: 'name',
+          align: 'center'
+        }, {
+          text: this.$t('operation'),
+          value: '',
+          align: 'center'
+        }]
+      },
       openDialog: function () {
         this.authorityGroupName = ''
         this.dialog = true
@@ -94,10 +153,30 @@
             if (response.status === 200) {
               this.closeDialog()
               this.selection = []
+              this.listAuthorityGroup()
               this.$notify.success('Add success')
-              this.search('', true)
             }
           })
+      },
+      listAuthorityGroup: function () {
+        this.$axios.get('/authority/authorityGroup/listAuthorityGroup')
+          .then(response => {
+            if (response.status === 200 && response.data.length > 0) {
+              let group = []
+              response.data.map(function (item, index) {
+                group[index] = {name: item}
+              })
+              this.authorityGroupItems = group
+              console.log(JSON.stringify(group))
+            }
+          })
+      },
+      openAuthorityGroupDetail: function () {
+        this.authorityGroupDetailDialog = true
+      },
+      closeAuthorityGroupDetail: function () {
+        this.detailSelection = []
+        this.authorityGroupDetailDialog = false
       }
     },
     created: function () {
@@ -123,6 +202,10 @@
         itemList[parseInt(i)] = treeItem
       }
       this.treeItems = itemList
+    },
+    mounted: function () {
+      this.setHeader()
+      this.listAuthorityGroup()
     }
   }
 </script>

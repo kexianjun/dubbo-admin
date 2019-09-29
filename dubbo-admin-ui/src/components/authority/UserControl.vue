@@ -162,9 +162,6 @@
           return []
         }
         return this.resultPage.content
-      },
-      authorityGroupList () {
-        return this.authorityGroup
       }
     },
     watch: {
