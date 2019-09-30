@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -64,7 +65,13 @@ public class AuthorityGroupController {
         return null;
     }
 
+    @RequestMapping(value = "/getGroupAuthority", method = RequestMethod.GET)
+    public Set<String> getGroupAuthority(@RequestParam String groupName) {
+        return authorityStore.getGroupAuthority(groupName);
+    }
+
     private User getUserInfo() {
+
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (null == attributes) {
             return null;

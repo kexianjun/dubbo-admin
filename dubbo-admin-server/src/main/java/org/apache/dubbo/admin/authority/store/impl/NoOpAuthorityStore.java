@@ -25,6 +25,7 @@ import org.apache.dubbo.admin.model.dto.UserDTO;
 import org.apache.dubbo.common.URL;
 
 import java.util.List;
+import java.util.Set;
 
 public class NoOpAuthorityStore implements AuthorityStore {
     public static final String NAME = "noop";
@@ -82,5 +83,10 @@ public class NoOpAuthorityStore implements AuthorityStore {
     @Override
     public void authorityToUser(UserAuthorityDTO userAuthorityDTO) {
 
+    }
+
+    @Override
+    public Set<String> getGroupAuthority(String groupName) {
+        return null;
     }
 }

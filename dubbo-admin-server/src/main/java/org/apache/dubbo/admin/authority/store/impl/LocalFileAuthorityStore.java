@@ -327,6 +327,15 @@ public class LocalFileAuthorityStore implements AuthorityStore {
         userStore.saveStore(store);
     }
 
+    @Override
+    public Set<String> getGroupAuthority(String groupName) {
+        AuthorityGroup store = authorityGroupStore.getStore(groupName);
+        if (null != store) {
+            return store.getAuthorityKeyList();
+        }
+        return null;
+    }
+
     private static class UserStore extends AbstractStore<User> {
         public UserStore(String fileName) {
             super(fileName);

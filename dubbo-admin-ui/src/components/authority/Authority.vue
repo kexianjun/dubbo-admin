@@ -167,11 +167,62 @@
                 group[index] = {name: item}
               })
               this.authorityGroupItems = group
-              console.log(JSON.stringify(group))
             }
           })
       },
-      openAuthorityGroupDetail: function () {
+      openAuthorityGroupDetail: function (authorityGroupName) {
+        this.$axios.get('/authority/authorityGroup/getGroupAuthority', {
+          params: {groupName: authorityGroupName}
+        }).then(response => {
+          if (response.status === 200 && response.data.length > 0) {
+            let selectedTreeNodes = []
+            let selectItems = 0
+            for (let treeNodeIndex in this.treeItems) {
+              let treeNode = this.treeItems[treeNodeIndex]
+              let allNodeSelected = false
+              if (treeNode.children) {
+                let childSize = 0
+                let childItems = []
+                for (let childNodeIndex in treeNode.children) {
+                  let childNode = treeNode.children[childNodeIndex]
+                  for (let authorityTitle in response.data) {
+                    if (response.data[authorityTitle] === childNode.key) {
+                      childSize++
+                      let item = {}
+                      item.id = childNode.id
+                      item.name = childNode.name
+                      item.key = childNode.key
+                      childItems[childSize++] = item
+                    }
+                  }
+                }
+                if (childSize === treeNode.children.length) {
+                  allNodeSelected = true
+                  let paramItem = {}
+                  paramItem.id = treeNode.id
+                  paramItem.name = treeNode.name
+                  paramItem.key = treeNode.key
+                  paramItem.children = childItems
+                  selectedTreeNodes[selectItems++] = paramItem
+                } else if (childItems.length > 0) {
+                  for (let selectChild in childItems) {
+                    selectedTreeNodes[selectItems++] = childItems[selectChild]
+                  }
+                }
+              }
+              for (let selectedTitle in response.data) {
+                if (!allNodeSelected && response.data[selectedTitle] === treeNode.key) {
+                  let item = {}
+                  item.id = treeNode.id
+                  item.name = treeNode.name
+                  item.key = treeNode.key
+                  selectedTreeNodes[selectItems++] = item
+                }
+              }
+            }
+            this.detailSelection = selectedTreeNodes
+          }
+        })
         this.authorityGroupDetailDialog = true
       },
       closeAuthorityGroupDetail: function () {

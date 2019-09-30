@@ -10,6 +10,7 @@ import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.extension.SPI;
 
 import java.util.List;
+import java.util.Set;
 
 @SPI(LocalFileAuthorityStore.NAME)
 public interface AuthorityStore {
@@ -35,4 +36,6 @@ public interface AuthorityStore {
     User getUserByToken(String authorization);
 
     void authorityToUser(UserAuthorityDTO userAuthorityDTO);
+
+    Set<String> getGroupAuthority(String groupName);
 }
