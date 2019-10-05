@@ -89,4 +89,9 @@ public class NoOpAuthorityStore implements AuthorityStore {
     public Set<String> getGroupAuthority(String groupName) {
         return null;
     }
+
+    @Override
+    public boolean logout(String token) {
+        return false;
+    }
 }

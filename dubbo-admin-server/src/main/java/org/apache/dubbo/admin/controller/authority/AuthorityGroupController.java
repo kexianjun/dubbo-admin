@@ -16,6 +16,7 @@
  */
 package org.apache.dubbo.admin.controller.authority;
 
+import org.apache.dubbo.admin.annotation.Authority;
 import org.apache.dubbo.admin.authority.store.AuthorityStore;
 import org.apache.dubbo.admin.model.domain.User;
 import org.apache.dubbo.admin.model.dto.AuthorityGroupDTO;
@@ -27,11 +28,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.apache.dubbo.admin.common.util.UserInfoUtil.getUserInfo;
 
 @RestController
 @RequestMapping("/api/{env}/authority/authorityGroup")
@@ -39,6 +40,7 @@ public class AuthorityGroupController {
     @Autowired
     private AuthorityStore authorityStore;
 
+    @Authority(authority = "authConfig", checkAuthority = true)
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public boolean createAuthorityGroup(@RequestBody AuthorityGroupDTO authorityGroupDTO) {
         authorityStore.saveAuthorityGroup(authorityGroupDTO);
@@ -56,6 +58,7 @@ public class AuthorityGroupController {
         return true;
     }
 
+    @Authority(authority = "authConfig", checkAuthority = true)
     @RequestMapping(value = "listAuthorityGroup", method = RequestMethod.GET)
     public Set<String> getAuthorityGroup() {
         User userInfo = getUserInfo();
@@ -65,18 +68,9 @@ public class AuthorityGroupController {
         return null;
     }
 
+    @Authority(authority = "authConfig", checkAuthority = true)
     @RequestMapping(value = "/getGroupAuthority", method = RequestMethod.GET)
     public Set<String> getGroupAuthority(@RequestParam String groupName) {
         return authorityStore.getGroupAuthority(groupName);
-    }
-
-    private User getUserInfo() {
-
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (null == attributes) {
-            return null;
-        }
-        return (User) attributes.getAttribute("userInfo", 0);
-
     }
 }

@@ -74,6 +74,7 @@
           if (response.status === 200 && response.data) {
             localStorage.setItem('token', response.data.token)
             localStorage.setItem('authorityList', JSON.stringify(response.data.authoritys))
+            localStorage.setItem('username', userName)
             console.log('login success')
             this.$router.replace('/index')
           } else {

@@ -73,7 +73,7 @@
     </v-menu>
 
     <!--login user info-->
-    <v-menu offset-y origin="center center" :nudge-bottom="10" transition="scale-transition" v-if="false">
+    <v-menu offset-y origin="center center" :nudge-bottom="10" transition="scale-transition" v-if="true">
       <v-btn icon large flat slot="activator">
         <v-avatar size="30px">
           <img src="@/assets/avatar.png" alt="Logined User" />
@@ -166,6 +166,10 @@
         this.selectedLang = '简体中文'
       } else {
         this.selectedLang = 'English'
+      }
+      let username = localStorage.getItem('username')
+      if (username) {
+        this.items[0].title = this.$t('userName') + ':' + username
       }
     }
   }

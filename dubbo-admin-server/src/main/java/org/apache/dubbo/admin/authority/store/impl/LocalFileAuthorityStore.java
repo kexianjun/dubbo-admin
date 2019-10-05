@@ -124,6 +124,7 @@ public class LocalFileAuthorityStore implements AuthorityStore {
         authorityGroupMap.put("admin", adminAuthorityList);
 
     }
+
     public LocalFileAuthorityStore() {
     }
 
@@ -202,7 +203,7 @@ public class LocalFileAuthorityStore implements AuthorityStore {
                 menuAuthority.setAuthorityType(Authority.MENU);
                 authorityMap.put(menuEntry.getKey(), menuAuthority);
                 if (CollectionUtils.isNotEmpty(menuEntry.getValue())) {
-                    for (String interfaceAuthority :menuEntry.getValue()){
+                    for (String interfaceAuthority : menuEntry.getValue()) {
                         Authority authority = new Authority();
                         authority.setAuthorityKey(interfaceAuthority);
                         authority.setParent(menuEntry.getKey());
@@ -318,11 +319,8 @@ public class LocalFileAuthorityStore implements AuthorityStore {
     @Override
     public void authorityToUser(UserAuthorityDTO userAuthorityDTO) {
         User store = userStore.getStore(userAuthorityDTO.getUserName());
-        Set<String> authorityGroup = store.getAuthorityGroup();
-        if (null == authorityGroup) {
-            authorityGroup = new HashSet<>();
-        }
-        authorityGroup.addAll(userAuthorityDTO.getAuthorityGroupList());
+
+        Set<String> authorityGroup = new HashSet<>(userAuthorityDTO.getAuthorityGroupList());
         store.setAuthorityGroup(authorityGroup);
         userStore.saveStore(store);
     }
@@ -336,13 +334,18 @@ public class LocalFileAuthorityStore implements AuthorityStore {
         return null;
     }
 
+    @Override
+    public boolean logout(String token) {
+        return tokenStore.remove(token);
+    }
+
     private static class UserStore extends AbstractStore<User> {
         public UserStore(String fileName) {
             super(fileName);
         }
     }
 
-    private static class TokenStore extends AbstractStore<UserToken>{
+    private static class TokenStore extends AbstractStore<UserToken> {
         public TokenStore(String fileName) {
             super(fileName);
         }
@@ -353,7 +356,7 @@ public class LocalFileAuthorityStore implements AuthorityStore {
 
     }
 
-    private static class AuthorityStore extends AbstractStore<Authority>{
+    private static class AuthorityStore extends AbstractStore<Authority> {
         public AuthorityStore(String fileName) {
             super(fileName);
         }
@@ -407,7 +410,7 @@ public class LocalFileAuthorityStore implements AuthorityStore {
         }
 
         private boolean saveFile() {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))){
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
                 String jsonString = JSON.toJSONString(storeMap.values());
                 writer.write(jsonString);
                 return true;

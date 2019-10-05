@@ -16,6 +16,7 @@
  */
 package org.apache.dubbo.admin.interceptor;
 
+import org.apache.dubbo.admin.annotation.Authority;
 import org.apache.dubbo.admin.authority.store.AuthorityStore;
 import org.apache.dubbo.admin.model.domain.User;
 
@@ -43,14 +44,21 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
         }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         Method method = handlerMethod.getMethod();
-        String authorization = request.getHeader("Authorization");
-        User user = authorityStore.getUserByToken(authorization);
-        if (null == user) {
-            log.warn("User not log in");
-            return false;
+        Authority authority = method.getDeclaredAnnotation(Authority.class);
+        if (null != authority && authority.checkAuthority()) {
+            String authorization = request.getHeader("Authorization");
+            User user = authorityStore.getUserByToken(authorization);
+            if (null == user) {
+                log.warn("User not log in");
+                return false;
+            }
+            //TODO check authority here
+            request.setAttribute("userInfo", user);
+            log.info("user token:{}", authorization);
+            return true;
+        } else {
+            return true;
         }
-        request.setAttribute("userInfo", user);
-        log.info("user token:{}", authorization);
-        return true;
+
     }
 }

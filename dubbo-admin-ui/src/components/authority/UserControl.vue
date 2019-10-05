@@ -26,7 +26,17 @@
               <template slot="items" slot-scope="props">
                 <td>{{props.item.userName}}</td>
                 <td>{{props.item.password}}</td>
-                <td>{{props.item.authorityGroup}}</td>
+                <td>
+                  <v-layout row>
+                    <v-flex xs1 lg4 sm6
+                            v-for="group in props.item.authorityGroup"
+                            :key="group"
+                    >
+                      <v-btn small color="tiny" @click.stop='showAuthorityGroupDetail(group)' class="mb-2">{{group}}
+                      </v-btn>
+                    </v-flex>
+                  </v-layout>
+                </td>
                 <td class="text-xs-center px-0" nowrap>
                   <v-btn outline small color="tiny" @click.stop="openAuthorityDialog(props.item.userName)" class="mb-2">
                     {{$t('authority')}}
@@ -123,11 +133,33 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="authorityGroupDetailDialog" width="400px" persistent>
+      <v-card>
+        <v-card-title class="justify-center">
+          <span class="headline">{{$t('detail')}}</span>
+        </v-card-title>
+        <v-flex lg4 sm6 xs12>
+          <v-treeview
+            v-model="detailSelection"
+            :items="treeItems"
+            selectable
+            return-object
+            open-all
+          ></v-treeview>
+        </v-flex>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn flat @click.native="closeAuthorityGroupDetail">{{$t('close')}}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script>
   import Search from '@/components/public/Search'
+  import menu from '@/api/menu'
 
   export default {
     name: 'UserControl',
@@ -137,6 +169,9 @@
     data: () => ({
       dialog: false,
       authorityDialog: false,
+      authorityGroupDetailDialog: false,
+      detailSelection: [],
+      treeItems: [],
       userName: '',
       password: '',
       filter: '',
@@ -178,6 +213,30 @@
         },
         deep: true
       }
+    },
+    created: function () {
+      let itemList = []
+      let id = 1
+      for (let i in menu) {
+        let item = menu[i]
+        let treeItem = {}
+        treeItem.id = id++
+        treeItem.name = this.$t(item.title)
+        treeItem.key = item.title
+        if (item.items) {
+          let children = []
+          for (let j in item.items) {
+            let child = {}
+            child.id = id++
+            child.name = this.$t(item.items[j].title)
+            child.key = item.items[j].title
+            children[parseInt(j)] = child
+          }
+          treeItem.children = children
+        }
+        itemList[parseInt(i)] = treeItem
+      }
+      this.treeItems = itemList
     },
     methods: {
       setHeaders: function () {
@@ -306,6 +365,68 @@
             this.search('', true)
           }
         })
+      },
+      showAuthorityGroupDetail: function (authorityGroup) {
+        this.openAuthorityGroupDetail(authorityGroup)
+      },
+      openAuthorityGroupDetail: function (authorityGroupName) {
+        this.$axios.get('/authority/authorityGroup/getGroupAuthority', {
+          params: {groupName: authorityGroupName}
+        }).then(response => {
+          if (response.status === 200 && response.data.length > 0) {
+            let selectedTreeNodes = []
+            let selectItems = 0
+            for (let treeNodeIndex in this.treeItems) {
+              let treeNode = this.treeItems[treeNodeIndex]
+              let allNodeSelected = false
+              if (treeNode.children) {
+                let childSize = 0
+                let childItems = []
+                for (let childNodeIndex in treeNode.children) {
+                  let childNode = treeNode.children[childNodeIndex]
+                  for (let authorityTitle in response.data) {
+                    if (response.data[authorityTitle] === childNode.key) {
+                      childSize++
+                      let item = {}
+                      item.id = childNode.id
+                      item.name = childNode.name
+                      item.key = childNode.key
+                      childItems[childSize++] = item
+                    }
+                  }
+                }
+                if (childSize === treeNode.children.length) {
+                  allNodeSelected = true
+                  let paramItem = {}
+                  paramItem.id = treeNode.id
+                  paramItem.name = treeNode.name
+                  paramItem.key = treeNode.key
+                  paramItem.children = childItems
+                  selectedTreeNodes[selectItems++] = paramItem
+                } else if (childItems.length > 0) {
+                  for (let selectChild in childItems) {
+                    selectedTreeNodes[selectItems++] = childItems[selectChild]
+                  }
+                }
+              }
+              for (let selectedTitle in response.data) {
+                if (!allNodeSelected && response.data[selectedTitle] === treeNode.key) {
+                  let item = {}
+                  item.id = treeNode.id
+                  item.name = treeNode.name
+                  item.key = treeNode.key
+                  selectedTreeNodes[selectItems++] = item
+                }
+              }
+            }
+            this.detailSelection = selectedTreeNodes
+          }
+        })
+        this.authorityGroupDetailDialog = true
+      },
+      closeAuthorityGroupDetail: function () {
+        this.detailSelection = []
+        this.authorityGroupDetailDialog = false
       }
     },
     mounted: function () {

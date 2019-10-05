@@ -28,6 +28,17 @@
     },
     created () {
       window.getApp = this
+      window.getApp.$on('APP_LOGOUT', () => {
+        window.getApp.$axios.delete('/authority/user/logout')
+          .then(response => {
+            if (response.status === 200 && response.data) {
+              localStorage.removeItem('token')
+              localStorage.removeItem('authorityList')
+              localStorage.removeItem('username')
+              window.getApp.$router.replace('/login')
+            }
+          })
+      })
     }
   }
 </script>

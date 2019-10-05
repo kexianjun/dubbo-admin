@@ -38,4 +38,6 @@ public interface AuthorityStore {
     void authorityToUser(UserAuthorityDTO userAuthorityDTO);
 
     Set<String> getGroupAuthority(String groupName);
+
+    boolean logout(String token);
 }
