@@ -304,6 +304,9 @@ public class LocalFileAuthorityStore implements AuthorityStore {
     @Override
     public boolean saveAuthorityGroup(AuthorityGroupDTO authorityGroupDTO) {
         AuthorityGroup authorityGroup = new AuthorityGroup();
+        Set<Authority> authorities =
+                authorityGroupDTO.getAuthorityNameList().stream().map(key -> authorityStore.getStore(key)).collect(Collectors.toSet());
+
         authorityGroup.setAuthorityGroupKey(authorityGroupDTO.getAuthorityGroupName());
         authorityGroup.setAuthorityKeyList(authorityGroupDTO.getAuthorityNameList());
         authorityGroupStore.saveStore(authorityGroup);

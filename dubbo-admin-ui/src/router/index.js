@@ -32,7 +32,6 @@ import ServiceMetrics from '@/components/metrics/ServiceMetrics'
 import Management from '@/components/Management'
 import Authority from '@/components/authority/Authority'
 import UserControl from '@/components/authority/UserControl'
-import AuthorityGroup from '@/components/authority/AuthorityGroup'
 import Login from '../page/Login'
 import Index from '../page/Index'
 
@@ -41,7 +40,7 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/index',
+      path: '/',
       name: 'index',
       component: Index,
       meta: {
@@ -167,21 +166,16 @@ export default new Router({
           meta: {
             requireAuth: true
           }
-        },
-        {
-          path: '/authority/authgroup',
-          name: 'AuthorityGroup',
-          component: AuthorityGroup,
-          meta: {
-            requireAuth: true
-          }
         }
       ]
     },
     {
       path: '/login',
       name: 'Login',
-      component: Login
+      component: Login,
+      meta: {
+        requireAuth: false
+      }
     }
   ]
 })

@@ -59,8 +59,7 @@ new Vue({
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requireAuth)) {
-    console.log('需要登录')
-    if (localStorage.token) {
+    if (localStorage.getItem('token')) {
       next()
     } else {
       next({

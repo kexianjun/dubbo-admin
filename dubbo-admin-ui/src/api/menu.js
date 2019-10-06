@@ -40,7 +40,6 @@ const Menu = [
     group: 'authority',
     items: [
       { title: 'userController', path: '/authority/user', icon: 'build' },
-      { title: 'authGroup', path: '/authority/authgroup', icon: 'build' },
       { title: 'authConfig', path: '/authority/authority', icon: 'build' }
     ]
   }
